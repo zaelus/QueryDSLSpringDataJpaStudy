@@ -6,7 +6,7 @@
 
     <groupId>it.fcap.example.app</groupId>
     <artifactId>dynamic-querydsl-springdatajpa</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 
     <properties>
         <springdata.version>1.9.0.RELEASE</springdata.version>
