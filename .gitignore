@@ -1,4 +1,5 @@
 **/hsql*/
 **/logs/
+**/target/
 **/.idea/
 *.iml
