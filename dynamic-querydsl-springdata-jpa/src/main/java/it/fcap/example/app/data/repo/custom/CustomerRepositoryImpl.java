@@ -1,10 +1,11 @@
 package it.fcap.example.app.data.repo.custom;
 
-import com.mysema.query.jpa.impl.JPAQuery;
-import com.mysema.query.types.OrderSpecifier;
-import com.mysema.query.types.expr.BooleanExpression;
-import com.mysema.query.types.path.PathBuilder;
-import com.mysema.query.types.template.BooleanTemplate;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.PathBuilder;
+import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.impl.JPAQuery;
 import it.fcap.example.app.data.model.Customer;
 import it.fcap.example.app.data.model.QCustomer;
 import it.fcap.example.app.data.repo.custom.strategy.CustomerCriteriaStrategyEnum;
@@ -37,7 +38,7 @@ public class CustomerRepositoryImpl implements CustomerRepositoryCustom<Customer
 
 		QCustomer customer = new QCustomer(Q_ENTITY_RESULT);
 
-		JPAQuery coreQuery = jpaQuery.from(customer);
+		JPQLQuery<Customer> coreQuery = jpaQuery.from(customer);
 
 		// SEARCH EXPRESSION + EVENTUALI JOIN
 		BooleanExpression whereBody = this.buildAdvancedSearchExpression(
@@ -49,7 +50,7 @@ public class CustomerRepositoryImpl implements CustomerRepositoryCustom<Customer
 
 		// Costruisco la Paginazione
 		Page<Customer> pageResult = this.buildPageForCustomersByQuery(
-				pageRequest, customer, coreQuery, Q_ENTITY_RESULT
+				pageRequest, coreQuery, Q_ENTITY_RESULT
 		);
 
 		return pageResult;
@@ -58,10 +59,10 @@ public class CustomerRepositoryImpl implements CustomerRepositoryCustom<Customer
 	private BooleanExpression buildAdvancedSearchExpression(
 			QCustomer rootQentity,
 			CriteriaBean criteria,
-			JPAQuery query,
+			JPQLQuery<Customer> query,
 			CustomerCriteriaStrategyEnum... args) {
 
-		BooleanExpression result =  BooleanTemplate.TRUE.eq(Boolean.TRUE);
+		BooleanExpression result = rootQentity.eq(rootQentity);
 
 		for (CustomerCriteriaStrategyEnum strategy: args) {
 			strategy.addSearchCondition(rootQentity, query, criteria);
@@ -71,20 +72,21 @@ public class CustomerRepositoryImpl implements CustomerRepositoryCustom<Customer
 	}
 
 	private Page<Customer> buildPageForCustomersByQuery(
-			Pageable pageRequest, QCustomer customer, JPAQuery query, String qResultName
+			Pageable pageRequest,
+			JPQLQuery<Customer> query, String qResultName
 	) {
 
 		for (Sort.Order o : pageRequest.getSort()) {
 			PathBuilder orderByExpression = new PathBuilder(Object.class, qResultName);
 
-			query.orderBy(new OrderSpecifier(o.isAscending() ? com.mysema.query.types.Order.ASC
-					: com.mysema.query.types.Order.DESC, orderByExpression.get(o.getProperty())));
+			query.orderBy(new OrderSpecifier(o.isAscending() ? Order.ASC
+					: Order.DESC, orderByExpression.get(o.getProperty())));
 		}
 
 		int pageNumber = pageRequest.getPageNumber();
 		int pageSize = pageRequest.getPageSize();
-		List<Customer> content = query.offset(pageNumber*pageSize).limit(pageSize).list(customer);
-		long count = query.count();
+		List<Customer> content = query.offset(pageNumber*pageSize).limit(pageSize).fetch();
+		long count = query.fetchCount();
 		return new PageImpl<Customer>(
 				content, pageRequest, count
 		);

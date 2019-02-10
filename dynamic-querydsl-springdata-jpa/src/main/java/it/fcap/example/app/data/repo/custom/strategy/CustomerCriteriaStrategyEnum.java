@@ -1,6 +1,7 @@
 package it.fcap.example.app.data.repo.custom.strategy;
 
-import com.mysema.query.jpa.impl.JPAQuery;
+import com.querydsl.jpa.JPQLQuery;
+import it.fcap.example.app.data.model.Customer;
 import it.fcap.example.app.data.model.QCustomer;
 import it.fcap.example.app.data.search.CriteriaBean;
 import org.springframework.util.StringUtils;
@@ -13,7 +14,7 @@ public enum CustomerCriteriaStrategyEnum {
 	FIRST_NAME_SEARCH {
 		@Override
 		public void addSearchCondition(QCustomer rootQentity,
-									   JPAQuery query,
+									   JPQLQuery<Customer> query,
 									   CriteriaBean criteria) {
 			if(criteria == null ||
 					StringUtils.isEmpty(criteria.getFirstName())){
@@ -21,15 +22,15 @@ public enum CustomerCriteriaStrategyEnum {
 				return;
 			}
 
-			query.where(rootQentity.firstName
-					.likeIgnoreCase("%" + criteria.getFirstName()
+			query.where(rootQentity.firstName.toLowerCase()
+					.like("%" + criteria.getFirstName()
 							.toLowerCase() + "%"));
 		}
 	},
 	SECOND_NAME_SEARCH {
 		@Override
 		public void addSearchCondition(QCustomer rootQentity,
-									   JPAQuery query,
+									   JPQLQuery<Customer> query,
 									   CriteriaBean criteria) {
 			if(criteria == null ||
 					StringUtils.isEmpty(criteria.getLastName())){
@@ -37,13 +38,13 @@ public enum CustomerCriteriaStrategyEnum {
 				return;
 			}
 
-			query.where(rootQentity.lastName
-					.likeIgnoreCase("%" + criteria.getLastName()
+			query.where(rootQentity.lastName.toLowerCase()
+					.like("%" + criteria.getLastName()
 							.toLowerCase() + "%"));
 		}
 	};
 
 	public abstract void addSearchCondition(QCustomer rootQentity,
-											JPAQuery query,
+											JPQLQuery<Customer> query,
 											CriteriaBean criteria);
 }
