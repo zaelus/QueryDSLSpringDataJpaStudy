@@ -15,7 +15,7 @@
         <jUnit.version>4.11</jUnit.version>
         <hibernate.version>4.3.7.Final</hibernate.version>
         <spring.version>4.3.18.RELEASE</spring.version>
-        <log4j.core.version>2.5</log4j.core.version>
+        <log4j.core.version>2.13.2</log4j.core.version>
         <log4j.base.version>1.2.16</log4j.base.version>
     </properties>
 
